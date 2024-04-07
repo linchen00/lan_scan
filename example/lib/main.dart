@@ -3,19 +3,31 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:lan_scan/lan_scan.dart';
+import 'package:lan_scan_example/search_devices_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      home: HomePage(),
+    );
+  }
 }
 
-class _MyAppState extends State<MyApp> {
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   String _platformVersion = 'Unknown';
   final _lanScanPlugin = LanScan();
 
@@ -31,8 +43,7 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await _lanScanPlugin.getPlatformVersion() ?? 'Unknown platform version';
+      platformVersion = await _lanScanPlugin.getPlatformVersion() ?? 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -54,8 +65,21 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: FractionallySizedBox(
+          widthFactor: 1,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('Running on: $_platformVersion\n'),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SearchDevicesPage()));
+                },
+                child: const Text('go to SearchDevicesPage'),
+              ),
+            ],
+          ),
         ),
       ),
     );

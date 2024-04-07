@@ -5,4 +5,8 @@ class LanScan {
   Future<String?> getPlatformVersion() {
     return LanScanPlatform.instance.getPlatformVersion();
   }
+
+  Stream<String> searchWiFiDetectionStream() {
+    return LanScanPlatform.instance.searchWiFiDetectionStream();
+  }
 }

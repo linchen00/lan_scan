@@ -2,15 +2,16 @@ group 'com.example.lan_scan'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.7.10'
+    ext.kotlin_version = '1.9.22'
     repositories {
         google()
         mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.3.0'
+        classpath 'com.android.tools.build:gradle:8.3.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
     }
 }
 
@@ -23,6 +24,7 @@ allprojects {
 
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
+apply plugin: 'kotlinx-serialization'
 
 android {
     if (project.android.hasProperty("namespace")) {
@@ -51,7 +53,9 @@ android {
 
     dependencies {
         testImplementation 'org.jetbrains.kotlin:kotlin-test'
-        testImplementation 'org.mockito:mockito-core:5.0.0'
+        testImplementation 'org.mockito:mockito-core:5.4.0'
+        implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3"
+        implementation 'com.google.code.gson:gson:2.10.1'
     }
 
     testOptions {
@@ -63,6 +67,12 @@ android {
                outputs.upToDateWhen {false}
                showStandardStreams = true
             }
+        }
+    }
+
+    externalNativeBuild {
+        ndkBuild {
+            path file('src/main/c/Android.mk')
         }
     }
 }

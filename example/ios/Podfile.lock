@@ -1,17 +1,32 @@
 PODS:
+  - CocoaAsyncSocket (7.6.5)
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
   - lan_scan (0.0.1):
+    - CocoaAsyncSocket
     - Flutter
+    - MacFinder
+    - ReachabilitySwift
+    - TOSMBClient
+  - MacFinder (1.2.0)
   - permission_handler_apple (9.3.0):
     - Flutter
+  - ReachabilitySwift (5.2.1)
+  - TOSMBClient (1.0.8)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - integration_test (from `.symlinks/plugins/integration_test/ios`)
   - lan_scan (from `.symlinks/plugins/lan_scan/ios`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+
+SPEC REPOS:
+  trunk:
+    - CocoaAsyncSocket
+    - MacFinder
+    - ReachabilitySwift
+    - TOSMBClient
 
 EXTERNAL SOURCES:
   Flutter:
@@ -24,10 +39,14 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
 
 SPEC CHECKSUMS:
+  CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   integration_test: 13825b8a9334a850581300559b8839134b124670
-  lan_scan: 05c0fb28db77b7df8c6b6e18761cfbe1db64d244
+  lan_scan: 9e3f1e8338e3e5b75e6f118064f4e09f1928cf7a
+  MacFinder: 2bd98a9633f6b25c03b0b2dce14cd7d3bfffde64
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
+  TOSMBClient: 8884ede03ae70e6087962433fda22fb6b4b8c7f8
 
 PODFILE CHECKSUM: 431f492ffcc222927395e98a42e6270d4fadb82c
 

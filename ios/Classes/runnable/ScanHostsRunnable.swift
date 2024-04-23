@@ -24,8 +24,9 @@ class ScanHostsRunnable{
         for i in start...stop {
             let ipAddress = self.getIPAddress(index: i)
             let pingHelper =  PingHelper(ip: ipAddress,timeout: self.timeout)
-            if let ip = try? await pingHelper.start() {
-                ipList.append(ip)
+            let isSuccess =  await pingHelper.start()
+            if isSuccess {
+                ipList.append(ipAddress)
             }
         }
         return ipList

@@ -19,6 +19,7 @@ A new Flutter project.
   s.dependency 'TOSMBClient'
   s.dependency 'CocoaAsyncSocket'
   s.dependency 'MacFinder'
+  s.public_header_files = 'Classes/**/*.h'
   s.platform = :ios, '11.0'
 
   # Flutter.framework does not contain a i386 slice.

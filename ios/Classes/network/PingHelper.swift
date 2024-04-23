@@ -8,45 +8,85 @@
 import Foundation
 import MacFinder
 
-class PingHelper {
+class PingHelper: NSObject, GBPingDelegate {
+    
     let ip:String
     let timeout:TimeInterval
-
+    private var continuation: UnsafeContinuation<Bool?, any Error>?
+    var hadReceivedValue:Bool = false
+    
     init(ip: String, timeout: TimeInterval = TimeInterval(3)) {
         self.ip = ip
         self.timeout = timeout
     }
     
-    func  start () async throws -> String? {
+    private lazy var ping: GBPing = {
+        let ping = GBPing()
+        ping.host = self.ip
+        ping.timeout = self.timeout
+        ping.delegate = self
+        return ping
+    }()
+    
+    func  start () async  -> Bool {
+        guard (try? await ping.setup()) != nil else{
+            return false
+        }
         
-        var isSuccess:Bool? = try? await withUnsafeThrowingContinuation({ cont in
-            
-            if let pinger = try? SwiftyPing(ipv4Address: self.ip, config: PingConfiguration(interval: 0.5, with: timeout), queue: DispatchQueue.global()){
-                pinger.finished = { (pingResult) in
-                    let responses = pinger.responses
-                    let isSuccess = responses.contains { PingResponse in
-                        return  PingResponse.error==nil
-                    }
-                    cont.resume(returning: isSuccess)
-                }
-                pinger.targetCount = 1
-                do {
-                    try pinger.startPinging()
-                } catch {
-                    cont.resume(returning: false)
-                }
-            }else{
-                cont.resume(returning: false)
-            }
-            
-        })
+        var isSuccess:Bool? = try? await withUnsafeThrowingContinuation { cont in
+            self.ping.startPinging()
+            continuation = cont
+        }
+        self.ping.stop()
+        
         if (isSuccess != true) && (MacFinder.ip2mac(self.ip) != nil){
             isSuccess = true
         }
-        if (isSuccess == true) {
-            return self.ip
-        }else{
-            return nil
+        return isSuccess==true
+    }
+    
+    func ping(_ pinger: GBPing, didSendPingWith summary: GBPingSummary) {
+        debugPrint("didSendPingWith:summary-\(summary)")
+    }
+    
+    func ping(_ pinger: GBPing, didTimeoutWith summary: GBPingSummary) {
+        if !hadReceivedValue {
+            hadReceivedValue = true
+            continuation?.resume(returning: false)
+            debugPrint("didTimeoutWith:summary-\(summary)")
+        }
+
+    }
+    
+    func ping(_ pinger: GBPing, didFailToSendPingWith summary: GBPingSummary, error: any Error) {
+        if !hadReceivedValue {
+            hadReceivedValue = true
+            continuation?.resume(returning: false)
+            debugPrint("didFailToSendPingWith:summary-\(summary)")
+        }
+    }
+    
+    func ping(_ pinger: GBPing, didFailWithError error: any Error) {
+        if !hadReceivedValue {
+            hadReceivedValue = true
+            continuation?.resume(returning: false)
+            debugPrint("didFailWithError")
+        }
+    }
+    
+    func ping(_ pinger: GBPing, didReceiveReplyWith summary: GBPingSummary) {
+        if !hadReceivedValue {
+            hadReceivedValue = true
+            continuation?.resume(returning: true)
+            debugPrint("didReceiveReplyWith:summary-\(summary)")
+        }
+    }
+    
+    func ping(_ pinger: GBPing, didReceiveUnexpectedReplyWith summary: GBPingSummary) {
+        if !hadReceivedValue {
+            hadReceivedValue = true
+            continuation?.resume(returning: true)
+            debugPrint("didReceiveUnexpectedReplyWith:summary-\(summary)")
         }
     }
 }

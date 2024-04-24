@@ -9,12 +9,12 @@ part of '../host.dart';
 _$HostImpl _$$HostImplFromJson(Map<String, dynamic> json) => _$HostImpl(
       ip: json['ip'] as String,
       mac: json['mac'] as String?,
-      hostName: json['hostName'] as String?,
+      hostname: json['hostname'] as String?,
     );
 
 Map<String, dynamic> _$$HostImplToJson(_$HostImpl instance) =>
     <String, dynamic>{
       'ip': instance.ip,
       'mac': instance.mac,
-      'hostName': instance.hostName,
+      'hostname': instance.hostname,
     };

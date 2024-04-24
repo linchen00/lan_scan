@@ -14,6 +14,13 @@ public class LanScanPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
+          var host  =   Host(ip: "192.168.1.5")
+            host.hostname = "1555"
+            if let jsonData = try? JSONEncoder().encode(host),
+               let jsonString = String(data: jsonData, encoding: .utf8) {
+                print(jsonString)
+                
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

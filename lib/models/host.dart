@@ -10,7 +10,7 @@ class Host with _$Host {
   const factory Host({
     required String ip,
     String? mac,
-    String? hostName,
+    String? hostname,
   }) = _Host;
 
   factory Host.fromJson(Map<String, dynamic> json) => _$HostFromJson(json);

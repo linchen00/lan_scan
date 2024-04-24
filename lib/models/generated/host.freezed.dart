@@ -22,7 +22,7 @@ Host _$HostFromJson(Map<String, dynamic> json) {
 mixin _$Host {
   String get ip => throw _privateConstructorUsedError;
   String? get mac => throw _privateConstructorUsedError;
-  String? get hostName => throw _privateConstructorUsedError;
+  String? get hostname => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -34,7 +34,7 @@ abstract class $HostCopyWith<$Res> {
   factory $HostCopyWith(Host value, $Res Function(Host) then) =
       _$HostCopyWithImpl<$Res, Host>;
   @useResult
-  $Res call({String ip, String? mac, String? hostName});
+  $Res call({String ip, String? mac, String? hostname});
 }
 
 /// @nodoc
@@ -52,7 +52,7 @@ class _$HostCopyWithImpl<$Res, $Val extends Host>
   $Res call({
     Object? ip = null,
     Object? mac = freezed,
-    Object? hostName = freezed,
+    Object? hostname = freezed,
   }) {
     return _then(_value.copyWith(
       ip: null == ip
@@ -63,9 +63,9 @@ class _$HostCopyWithImpl<$Res, $Val extends Host>
           ? _value.mac
           : mac // ignore: cast_nullable_to_non_nullable
               as String?,
-      hostName: freezed == hostName
-          ? _value.hostName
-          : hostName // ignore: cast_nullable_to_non_nullable
+      hostname: freezed == hostname
+          ? _value.hostname
+          : hostname // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -78,7 +78,7 @@ abstract class _$$HostImplCopyWith<$Res> implements $HostCopyWith<$Res> {
       __$$HostImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String ip, String? mac, String? hostName});
+  $Res call({String ip, String? mac, String? hostname});
 }
 
 /// @nodoc
@@ -93,7 +93,7 @@ class __$$HostImplCopyWithImpl<$Res>
   $Res call({
     Object? ip = null,
     Object? mac = freezed,
-    Object? hostName = freezed,
+    Object? hostname = freezed,
   }) {
     return _then(_$HostImpl(
       ip: null == ip
@@ -104,9 +104,9 @@ class __$$HostImplCopyWithImpl<$Res>
           ? _value.mac
           : mac // ignore: cast_nullable_to_non_nullable
               as String?,
-      hostName: freezed == hostName
-          ? _value.hostName
-          : hostName // ignore: cast_nullable_to_non_nullable
+      hostname: freezed == hostname
+          ? _value.hostname
+          : hostname // ignore: cast_nullable_to_non_nullable
               as String?,
     ));
   }
@@ -115,7 +115,7 @@ class __$$HostImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$HostImpl with DiagnosticableTreeMixin implements _Host {
-  const _$HostImpl({required this.ip, this.mac, this.hostName});
+  const _$HostImpl({required this.ip, this.mac, this.hostname});
 
   factory _$HostImpl.fromJson(Map<String, dynamic> json) =>
       _$$HostImplFromJson(json);
@@ -125,11 +125,11 @@ class _$HostImpl with DiagnosticableTreeMixin implements _Host {
   @override
   final String? mac;
   @override
-  final String? hostName;
+  final String? hostname;
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Host(ip: $ip, mac: $mac, hostName: $hostName)';
+    return 'Host(ip: $ip, mac: $mac, hostname: $hostname)';
   }
 
   @override
@@ -139,7 +139,7 @@ class _$HostImpl with DiagnosticableTreeMixin implements _Host {
       ..add(DiagnosticsProperty('type', 'Host'))
       ..add(DiagnosticsProperty('ip', ip))
       ..add(DiagnosticsProperty('mac', mac))
-      ..add(DiagnosticsProperty('hostName', hostName));
+      ..add(DiagnosticsProperty('hostname', hostname));
   }
 
   @override
@@ -149,13 +149,13 @@ class _$HostImpl with DiagnosticableTreeMixin implements _Host {
             other is _$HostImpl &&
             (identical(other.ip, ip) || other.ip == ip) &&
             (identical(other.mac, mac) || other.mac == mac) &&
-            (identical(other.hostName, hostName) ||
-                other.hostName == hostName));
+            (identical(other.hostname, hostname) ||
+                other.hostname == hostname));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, ip, mac, hostName);
+  int get hashCode => Object.hash(runtimeType, ip, mac, hostname);
 
   @JsonKey(ignore: true)
   @override
@@ -175,7 +175,7 @@ abstract class _Host implements Host {
   const factory _Host(
       {required final String ip,
       final String? mac,
-      final String? hostName}) = _$HostImpl;
+      final String? hostname}) = _$HostImpl;
 
   factory _Host.fromJson(Map<String, dynamic> json) = _$HostImpl.fromJson;
 
@@ -184,7 +184,7 @@ abstract class _Host implements Host {
   @override
   String? get mac;
   @override
-  String? get hostName;
+  String? get hostname;
   @override
   @JsonKey(ignore: true)
   _$$HostImplCopyWith<_$HostImpl> get copyWith =>

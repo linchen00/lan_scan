@@ -9,19 +9,19 @@ import Foundation
 
 class ScanHostsRunnable{
     let start :Int
-    let stop :Int
+    let end :Int
     let timeout :TimeInterval
     
-    init(start: Int, stop: Int, timeout: TimeInterval) {
+    init(start: Int, end: Int, timeout: TimeInterval) {
         self.start = start
-        self.stop = stop
+        self.end = end
         self.timeout = timeout
     }
     
     func run()async -> [String] {
         var ipList:[String] = []
         
-        for i in start...stop {
+        for i in start...end {
             let ipAddress = self.getIPAddress(index: i)
             let pingHelper =  PingHelper(ip: ipAddress,timeout: self.timeout)
             let isSuccess =  await pingHelper.start()

@@ -57,7 +57,7 @@ class ScanHostsAsyncTask{
                 
                 taskGroup.addTask {
                     var host = Host(ip: ip)
-                    let mdnsResolver = MDNSResolver(timeout: TimeInterval(5))
+                    let mdnsResolver = MDNSResolver(timeout: TimeInterval(1))
                     let netBIOSResolver = NetBIOSResolver()
                     
                     if let hostname = self.getHostName(for: host.ip){

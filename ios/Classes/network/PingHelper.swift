@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import MacFinder
 
 class PingHelper: NSObject, GBPingDelegate {
     

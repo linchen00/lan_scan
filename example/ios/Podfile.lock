@@ -6,13 +6,11 @@ PODS:
   - lan_scan (0.0.1):
     - CocoaAsyncSocket
     - Flutter
-    - MacFinder
     - ReachabilitySwift
     - TOSMBClient
-  - MacFinder (1.2.0)
   - permission_handler_apple (9.3.0):
     - Flutter
-  - ReachabilitySwift (5.2.1)
+  - ReachabilitySwift (5.2.2)
   - TOSMBClient (1.0.8)
 
 DEPENDENCIES:
@@ -24,7 +22,6 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - CocoaAsyncSocket
-    - MacFinder
     - ReachabilitySwift
     - TOSMBClient
 
@@ -42,10 +39,9 @@ SPEC CHECKSUMS:
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   integration_test: 13825b8a9334a850581300559b8839134b124670
-  lan_scan: d52520d686bdc6e0fbaa6791c6fd684ce123510c
-  MacFinder: 2bd98a9633f6b25c03b0b2dce14cd7d3bfffde64
+  lan_scan: 6a9aaa05ed9b714b2bd1075bb5eb5478c03c4616
   permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
-  ReachabilitySwift: 5ae15e16814b5f9ef568963fb2c87aeb49158c66
+  ReachabilitySwift: 2128f3a8c9107e1ad33574c6e58e8285d460b149
   TOSMBClient: 8884ede03ae70e6087962433fda22fb6b4b8c7f8
 
 PODFILE CHECKSUM: 431f492ffcc222927395e98a42e6270d4fadb82c

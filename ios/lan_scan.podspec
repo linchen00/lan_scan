@@ -18,7 +18,6 @@ A new Flutter project.
   s.dependency 'ReachabilitySwift'
   s.dependency 'TOSMBClient'
   s.dependency 'CocoaAsyncSocket'
-  s.dependency 'MacFinder'
   s.public_header_files = 'Classes/**/*.h'
   s.platform = :ios, '11.0'
 

@@ -1,6 +1,7 @@
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'lan_scan_method_channel.dart';
+import 'models/host.dart';
 
 abstract class LanScanPlatform extends PlatformInterface {
   /// Constructs a LanScanPlatform.
@@ -27,7 +28,7 @@ abstract class LanScanPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Stream<String> searchWiFiDetectionStream() {
+  Stream<Host> searchWiFiDetectionStream() {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 }

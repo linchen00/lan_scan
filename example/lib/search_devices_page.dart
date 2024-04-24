@@ -15,7 +15,7 @@ class _SearchDevicesPageState extends State<SearchDevicesPage> {
   final _lanScanPlugin = LanScan();
 
   final List<String> list = [];
-  StreamSubscription<String>? _searchDevicesSubscription;
+  StreamSubscription<Host>? _searchDevicesSubscription;
 
   @override
   void dispose() {
@@ -28,17 +28,17 @@ class _SearchDevicesPageState extends State<SearchDevicesPage> {
     if(await locationPermissionStatus.isGranted) {
       _searchDevicesSubscription?.cancel();
       _searchDevicesSubscription = _lanScanPlugin.searchWiFiDetectionStream().listen(
-        (text) {
-          print("searchWiFiDetectionStreamEvent:$text");
+        (Host host) {
+          debugPrint("searchWiFiDetectionStreamEvent:$host");
           setState(() {
-            list.add(text);
+            list.add(host.toString());
           });
         },
         onError: (error) {
-          print("searchWiFiDetectionStreamError:$error");
+          debugPrint("searchWiFiDetectionStreamError:$error");
         },
         onDone: () {
-          print("searchWiFiDetectionStreamDone");
+          debugPrint("searchWiFiDetectionStreamDone");
         },
       );
     }

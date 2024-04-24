@@ -12,7 +12,7 @@ class MockLanScanPlatform
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Stream<String> searchWiFiDetectionStream() {
+  Stream<Host> searchWiFiDetectionStream() {
     // TODO: implement searchWiFiDetectionStream
     throw UnimplementedError();
   }

@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'lan_scan_platform_interface.dart';
+import 'models/host.dart';
 
 /// An implementation of [LanScanPlatform] that uses method channels.
 class MethodChannelLanScan extends LanScanPlatform {
@@ -12,7 +15,6 @@ class MethodChannelLanScan extends LanScanPlatform {
   @visibleForTesting
   final searchDevicesEventChannel = const EventChannel('lan_scan_search_devices');
 
-
   @override
   Future<String?> getPlatformVersion() async {
     final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
@@ -20,7 +22,10 @@ class MethodChannelLanScan extends LanScanPlatform {
   }
 
   @override
-  Stream<String> searchWiFiDetectionStream() {
-    return searchDevicesEventChannel.receiveBroadcastStream().map((event) => event.toString());
+  Stream<Host> searchWiFiDetectionStream() {
+    return searchDevicesEventChannel.receiveBroadcastStream().map((event) {
+      final json = jsonDecode(event) as Map<String, dynamic>;
+      return Host.fromJson(json);
+    });
   }
 }

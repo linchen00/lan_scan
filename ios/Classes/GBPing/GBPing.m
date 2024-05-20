@@ -9,9 +9,9 @@
 #import "GBPing.h"
 
 #if TARGET_OS_EMBEDDED || TARGET_IPHONE_SIMULATOR
-    #import <CFNetwork/CFNetwork.h>
+#import <CFNetwork/CFNetwork.h>
 #else
-    #import <CoreServices/CoreServices.h>
+#import <CoreServices/CoreServices.h>
 #endif
 
 #import "ICMPHeader.h"
@@ -62,6 +62,37 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
 }
 
 #pragma mark - custom acc
+
+- (void)incrementSequenceNumber {
+    @synchronized(self) {
+        self.nextSequenceNumber++;
+    }
+}
+
+- (void)addPendingPing:(GBPingSummary *)ping forKey:(NSNumber *)key {
+    @synchronized(self.pendingPings) {
+        self.pendingPings[key] = ping;
+    }
+}
+
+- (void)removePendingPingForKey:(NSNumber *)key {
+    @synchronized(self.pendingPings) {
+        [self.pendingPings removeObjectForKey:key];
+    }
+}
+
+- (void)addTimeoutTimer:(NSTimer *)timer forKey:(NSNumber *)key {
+    @synchronized(self.timeoutTimers) {
+        self.timeoutTimers[key] = timer;
+    }
+}
+
+- (void)removeTimeoutTimerForKey:(NSNumber *)key {
+    @synchronized(self.timeoutTimers) {
+        [self.timeoutTimers removeObjectForKey:key];
+    }
+}
+
 
 -(void)setTimeout:(NSTimeInterval)timeout {
     @synchronized(self) {
@@ -215,10 +246,10 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
             NSError *error;
             
             if (hostRef && streamError.domain == kCFStreamErrorDomainNetDB) {
-                userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                            [NSNumber numberWithInteger:streamError.error], kCFGetAddrInfoFailureKey,
+                userInfo = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:streamError.error],
+                            kCFGetAddrInfoFailureKey,
                             nil
-                            ];
+                ];
             }
             else {
                 userInfo = nil;
@@ -232,10 +263,10 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
             dispatch_async(dispatch_get_main_queue(), ^{
                 callback(NO, error);
             });
-          
+            
             //just incase
             if (hostRef) {
-              CFRelease(hostRef);
+                CFRelease(hostRef);
             }
             return;
         }
@@ -364,7 +395,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
     enum { kBufferSize = 65535 };
     
     buffer = malloc(kBufferSize);
-
+    
     if (buffer == nil) {
         err = errno;
         return;
@@ -384,18 +415,18 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
         struct sockaddr_in *sin = (struct sockaddr_in *)&addr;
         inet_ntop(sin->sin_family, &(sin->sin_addr), hoststr, INET6_ADDRSTRLEN);
         NSString *host = [[NSString alloc] initWithUTF8String:hoststr];
-
+        
         if([host isEqualToString:self.hostAddressString]) { // only make sense where received packet comes from expected source
             NSDate *receiveDate = [NSDate date];
             NSMutableData *packet;
-
+            
             packet = [NSMutableData dataWithBytes:buffer length:(NSUInteger) bytesRead];
-
+            
             if (packet == nil) {
                 err = errno;
                 return;
             }
-
+            
             //complete the ping summary
             const struct ICMPHeader *headerPointer;
             
@@ -408,7 +439,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
             NSUInteger seqNo = (NSUInteger)OSSwapBigToHostInt16(headerPointer->sequenceNumber);
             NSNumber *key = @(seqNo);
             GBPingSummary *pingSummary = [(GBPingSummary *)self.pendingPings[key] copy];
-
+            
             if (pingSummary) {
                 if ([self isValidPingResponsePacket:packet]) {
                     //override the source address (we might have sent to google.com and 172.123.213.192 replied)
@@ -421,18 +452,18 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
                         const struct IPHeader *ipPtr;
                         if ([packet length] >= sizeof(IPHeader)) {
                             ipPtr = (const IPHeader *)[packet bytes];
-                             pingSummary.ttl = ipPtr->timeToLive;
+                            pingSummary.ttl = ipPtr->timeToLive;
                         }
                     }
-
+                    
                     pingSummary.status = GBPingStatusSuccess;
-
+                    
                     //invalidate the timeouttimer
                     NSTimer *timer = self.timeoutTimers[key];
                     [timer invalidate];
-                    [self.timeoutTimers removeObjectForKey:key];
-
-
+                    [self removeTimeoutTimerForKey:key];
+                    
+                    
                     if (self.delegate && [self.delegate respondsToSelector:@selector(ping:didReceiveReplyWithSummary:)] ) {
                         dispatch_async(dispatch_get_main_queue(), ^{
                             //notify delegate
@@ -442,7 +473,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
                 }
                 else {
                     pingSummary.status = GBPingStatusFail;
-
+                    
                     if (self.delegate && [self.delegate respondsToSelector:@selector(ping:didReceiveUnexpectedReplyWithSummary:)] ) {
                         dispatch_async(dispatch_get_main_queue(), ^{
                             [self.delegate ping:self didReceiveUnexpectedReplyWithSummary:[pingSummary copy]];
@@ -453,7 +484,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
         }
     }
     else {
-
+        
         //we failed to read the data, so shut everything down.
         if (err == 0) {
             err = EPIPE;
@@ -480,13 +511,13 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
     @autoreleasepool {
         while (self.isPinging) {
             [self sendPing];
-          
+            
             NSTimeInterval runUntil = CFAbsoluteTimeGetCurrent() + self.pingPeriod;
             NSTimeInterval time = 0;
             while (runUntil > time) {
                 NSDate *runUntilDate = [NSDate dateWithTimeIntervalSinceReferenceDate:runUntil];
                 [[NSRunLoop currentRunLoop] runUntilDate:runUntilDate];
-        
+                
                 time = CFAbsoluteTimeGetCurrent();
             }
         }
@@ -495,7 +526,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
 
 -(void)sendPing {
     if (self.isPinging) {
-      
+        
         int err;
         NSData *packet;
         ssize_t bytesSent;
@@ -539,10 +570,10 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
             
             //add it to pending pings
             NSNumber *key = @(self.nextSequenceNumber);
-            self.pendingPings[key] = newPingSummary;
+            [self addPendingPing:newPingSummary forKey:key];
             
             //increment sequence number
-            self.nextSequenceNumber += 1;
+            [self incrementSequenceNumber];
             
             //we create a copy, this one will be passed out to other threads
             GBPingSummary *pingSummaryCopy = [newPingSummary copy];
@@ -550,27 +581,27 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
             //we need to clean up our list of pending pings, and we do that after the timeout has elapsed (+ some grace period)
             dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)((self.timeout + kPendingPingsCleanupGrace) * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
                 //remove the ping from the pending list
-                [self.pendingPings removeObjectForKey:key];
+                [self removePendingPingForKey:key];
             });
             
             //add a timeout timer
             //add a timeout timer
             NSTimer *timeoutTimer = [NSTimer scheduledTimerWithTimeInterval:self.timeout
                                                                      target:[NSBlockOperation blockOperationWithBlock:^{
-
-                                                                         newPingSummary.status = GBPingStatusFail;
-
-                                                                         //notify about the failure
-                                                                         if (self.delegate && [self.delegate respondsToSelector:@selector(ping:didTimeoutWithSummary:)]) {
-                                                                             dispatch_async(dispatch_get_main_queue(), ^{
-                                                                                 [self.delegate ping:self didTimeoutWithSummary:pingSummaryCopy];
-                                                                             });
-                                                                         }
-
-                                                                         //remove the timer itself from the timers list
-                                                                         //lm make sure that the timer list doesnt grow and these removals actually work... try logging the count of the timeoutTimers when stopping the pinger
-                                                                         [self.timeoutTimers removeObjectForKey:key];
-                                                                     }]
+                
+                newPingSummary.status = GBPingStatusFail;
+                
+                //notify about the failure
+                if (self.delegate && [self.delegate respondsToSelector:@selector(ping:didTimeoutWithSummary:)]) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [self.delegate ping:self didTimeoutWithSummary:pingSummaryCopy];
+                    });
+                }
+                
+                //remove the timer itself from the timers list
+                //lm make sure that the timer list doesnt grow and these removals actually work... try logging the count of the timeoutTimers when stopping the pinger
+                [self removeTimeoutTimerForKey:key];
+            }]
                                                                    selector:@selector(main)
                                                                    userInfo:nil
                                                                     repeats:NO];
@@ -578,7 +609,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
             
             //keep a local ref to it
             if (self.timeoutTimers) {
-                self.timeoutTimers[key] = timeoutTimer;
+                [self addTimeoutTimer:timeoutTimer forKey:key];
             }
             
             //notify delegate about this
@@ -588,8 +619,7 @@ static NSTimeInterval const kDefaultTimeout =           2.0;
                 });
             }
             
-            bytesSent = sendto(
-                               self.socket,
+            bytesSent = sendto(self.socket,
                                [packet bytes],
                                [packet length],
                                0,
@@ -840,7 +870,7 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen)
                 }
             }
         }
-
+        
     }
     
     return result;
@@ -909,18 +939,21 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen)
     return self;
 }
 
--(void)dealloc {
-    self.delegate = nil;
-    self.host = nil;
-    self.timeoutTimers = nil;
-    self.pendingPings = nil;
-    self.hostAddress = nil;
-    
-    //clean up socket to be sure
-    if (self.socket) {
-        close(self.socket);
-        self.socket = 0;
+- (void)dealloc {
+    @synchronized (self) {
+        self.delegate = nil;
+        self.host = nil;
+        self.timeoutTimers = nil;
+        self.pendingPings = nil;
+        self.hostAddress = nil;
+        
+        //clean up socket to be sure
+        if (self.socket) {
+            close(self.socket);
+            self.socket = 0;
+        }
     }
+    
 }
 
 @end

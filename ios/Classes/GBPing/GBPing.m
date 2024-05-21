@@ -893,11 +893,10 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen)
 }
 
 - (NSData *)pingPacketWithType:(uint8_t)type payload:(NSData *)payload requiresChecksum:(BOOL)requiresChecksum {
-    NSMutableData *         packet;
-    ICMPHeader *            icmpPtr;
+    NSMutableData *packet = [NSMutableData dataWithLength:sizeof(ICMPHeader) + payload.length];
+    if (!packet) { return nil; }
     
-    packet = [NSMutableData dataWithLength:sizeof(*icmpPtr) + payload.length];
-    if (packet == nil) { return nil; }
+    ICMPHeader *icmpPtr = packet.mutableBytes;
     
     icmpPtr = packet.mutableBytes;
     icmpPtr->type = type;
@@ -918,13 +917,10 @@ static uint16_t in_cksum(const void *buffer, size_t bufferLen)
 }
 
 - (sa_family_t)hostAddressFamily {
-    sa_family_t     result;
-    
-    result = AF_UNSPEC;
-    if ( (self.hostAddress != nil) && (self.hostAddress.length >= sizeof(struct sockaddr)) ) {
-        result = ((const struct sockaddr *) self.hostAddress.bytes)->sa_family;
+    if (self.hostAddress && self.hostAddress.length >= sizeof(struct sockaddr)) {
+        return ((const struct sockaddr *)self.hostAddress.bytes)->sa_family;
     }
-    return result;
+    return AF_UNSPEC;
 }
 
 #pragma mark - memory

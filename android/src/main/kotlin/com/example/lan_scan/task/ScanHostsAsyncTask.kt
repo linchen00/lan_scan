@@ -55,7 +55,7 @@ class ScanHostsAsyncTask(private val eventSink: EventSink) {
         val numberOfHosts = 2.0.pow(hostBits).toInt() - 2
         val firstAddress = (ipv4 and netmask) + 1
 
-        val scanThreads = hostBits.toInt()
+        val scanThreads = hostBits.toInt() * 4 * 2
         val chunk = ceil(numberOfHosts.toDouble() / scanThreads).toInt()
         var previousStart = firstAddress
         var previousStop = firstAddress + (chunk - 2)
@@ -72,7 +72,7 @@ class ScanHostsAsyncTask(private val eventSink: EventSink) {
                                 ScanHostsRunnable(
                                     start,
                                     stop,
-                                    5 * DateUtils.SECOND_IN_MILLIS
+                                    DateUtils.SECOND_IN_MILLIS
                                 )
                             scanHostsRunnable.run()
                         }

@@ -28,6 +28,12 @@ class ScanHostsAsyncTask{
         let ipList = await scanIPRange(firstAddr: firstAddr,numberOfHosts:numberOfHosts,threadsCount: scanThreads)
         
         print("difference:\(Date().timeIntervalSince(startTime))")
+        if (ipList.isEmpty){
+             DispatchQueue.main.async {
+                 self.eventSink(FlutterEndOfEventStream)
+             }
+             return
+         }
     
         let ipChunkSize = Int(ceil((Double(ipList.count) / Double(scanThreads))))
         

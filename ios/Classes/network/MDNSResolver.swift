@@ -27,7 +27,7 @@ class MDNSResolver: Resolver {
         do {
             let chatMulticastGroup = try SocketAddress(ipAddress: mdnsIP, port: mdnsPort)
             let responsePromise = MDNSResolver.group.next().makePromise(of: String?.self)
-            let datagramChannel = try await createDatagramChannel(group:MDNSResolver.group, chatMulticastGroup: chatMulticastGroup,responsePromise: responsePromise)
+            let datagramChannel = try await createDatagramChannel(group:MDNSResolver.group, chatMulticastGroup: chatMulticastGroup,responsePromise: responsePromise,ip: ip)
             
             let timeoutFuture = datagramChannel.eventLoop.scheduleTask(in: timeout) {
                 responsePromise.succeed(nil)
@@ -45,18 +45,18 @@ class MDNSResolver: Resolver {
         }
     }
     
-    private func createDatagramChannel(group: MultiThreadedEventLoopGroup, chatMulticastGroup: SocketAddress,responsePromise: EventLoopPromise<String?>) async throws -> Channel {
+    private func createDatagramChannel(group: MultiThreadedEventLoopGroup, chatMulticastGroup: SocketAddress,responsePromise: EventLoopPromise<String?>,ip: String) async throws -> Channel {
         let datagramBootstrap = DatagramBootstrap(group: group)
             .channelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEPORT), value: 1)
             .channelOption(ChannelOptions.socket(SOL_SOCKET, SO_REUSEADDR), value: 1)
             .channelOption(ChannelOptions.socket(SOL_SOCKET, SO_BROADCAST), value: 1)
             .channelInitializer { channel in
                 return channel.pipeline.addHandler(ChatMessageEncoder()).flatMap {
-                    channel.pipeline.addHandler(ChatMessageDecoder(responsePromise: responsePromise))
+                    channel.pipeline.addHandler(ChatMessageDecoder(responsePromise: responsePromise,ip: ip))
                 }
             }
         let datagramChannel = try await datagramBootstrap
-            .bind(host: "0.0.0.0", port: 7654)
+            .bind(host: "0.0.0.0", port: getBindPort(ip))
             .flatMap { channel -> EventLoopFuture<Channel> in
                 let channel = channel as! MulticastChannel
                 return channel.joinGroup(chatMulticastGroup).map { channel }
@@ -70,6 +70,17 @@ class MDNSResolver: Resolver {
             try await datagramChannel.writeAndFlush(AddressedEnvelope(remoteAddress: chatMulticastGroup, data: data, metadata: nil))
         }
     }
+    
+    private func getBindPort(_ ip:String)->Int{
+        let basePort = 7654
+        let addrParts = ip.split(separator: ".")
+        
+        if let lastPart = addrParts.last, let port = Int(String(lastPart)) {
+            return port + basePort
+        }
+        
+        return basePort
+    }
 
 }
 
@@ -77,9 +88,11 @@ private final class ChatMessageDecoder: ChannelInboundHandler {
     public typealias InboundIn = AddressedEnvelope<ByteBuffer>
     
     let responsePromise: EventLoopPromise<String?>
+    let ip: String
     
-    init(responsePromise: EventLoopPromise<String?>) {
+    init(responsePromise: EventLoopPromise<String?>,ip: String) {
         self.responsePromise = responsePromise
+        self.ip = ip
     }
 
     public func channelRead(context: ChannelHandlerContext, data: NIOAny) {
@@ -91,19 +104,19 @@ private final class ChatMessageDecoder: ChannelInboundHandler {
             debugPrint("Error: invalid string received")
             return
         }
-        guard let ipAddress = envelope.remoteAddress.ipAddress,
-              let requestID = calculateRequestID(ip: ipAddress) else{
+        guard let requestID = calculateRequestID(ip: self.ip) else{
             return
         }
+        let name = reverseName(name: self.ip)
 
-        let requestBytes = dnsRequest(id: requestID, name: reverseName(name: ipAddress)) //得发送data才能得到回应，这个根据交互方案传值
+        let requestBytes = dnsRequest(id: requestID, name: name) //得发送data才能得到回应，这个根据交互方案传值
         if(responseBytes[0] != requestBytes[0]) && (responseBytes[1] != requestBytes[1]){
             return
         }
         
         var offset = requestBytes.count
         if responseBytes[5] == 0{
-            offset = 12 + reverseName(name:ipAddress).count
+            offset = 12 + name.count
         }
         offset += 2+2+2+4+2
         
@@ -177,15 +190,15 @@ private func decodeName( bytes:[UInt8],offset :Int,length :Int) ->String?{
     var name:String = ""
     var i = offset
     while i<offset+length{
-        let lableCount = Int(bytes[i])
-        if lableCount == 0{
+        let labelCount = Int(bytes[i])
+        if labelCount == 0{
             break
         }
         i+=1
         
-        if let str = String(bytes: bytes[i..<i+lableCount], encoding: .utf8) {
+        if let str = String(bytes: bytes[i..<i+labelCount], encoding: .utf8) {
             name.append("\(str).")
-            i += lableCount
+            i += labelCount
         } else {
             break
         }

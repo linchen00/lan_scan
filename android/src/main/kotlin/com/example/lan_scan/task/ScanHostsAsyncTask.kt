@@ -1,5 +1,6 @@
 package com.example.lan_scan.task
 
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.ParcelFileDescriptor
@@ -89,23 +90,29 @@ class ScanHostsAsyncTask(private val eventSink: EventSink) {
                 scanHostJob.cancelChildren() // 超时时取消所有协程
             }
 
-            val arpList = parseAndExtractValidArpFromInputStream()
-
-            Log.d(tag, "arpListSize:${arpList.size}")
-
-            async {
-                arpList.forEach { arp ->
-                    launch(Dispatchers.IO) {
-                        val host = processArp(arp)
-                        val json = Gson().toJson(host)
-                        mainHandler.post {
-                            eventSink.success(json)
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                Log.d(tag, "android 13+")
+                eventSink.endOfStream()
+            }else{
+                val arpList = parseAndExtractValidArpFromInputStream()
+                Log.d(tag, "arpListSize:${arpList.size}")
+                async {
+                    arpList.forEach { arp ->
+                        launch(Dispatchers.IO) {
+                            val host = processArp(arp)
+                            val json = Gson().toJson(host)
+                            mainHandler.post {
+                                eventSink.success(json)
+                            }
                         }
                     }
-                }
-            }.await()
+                }.await()
 
-            eventSink.endOfStream()
+                eventSink.endOfStream()
+            }
+
+
+
 
         }
 

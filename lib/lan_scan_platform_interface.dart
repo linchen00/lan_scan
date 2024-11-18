@@ -28,7 +28,7 @@ abstract class LanScanPlatform extends PlatformInterface {
     throw UnimplementedError('platformVersion() has not been implemented.');
   }
 
-  Stream<Host> searchWiFiDetectionStream() {
-    throw UnimplementedError('platformVersion() has not been implemented.');
+  Stream<Host?> startDeviceScanStream() {
+    throw UnimplementedError('startDeviceScanStream() has not been implemented.');
   }
 }

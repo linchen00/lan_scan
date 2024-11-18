@@ -4,16 +4,13 @@ import 'package:lan_scan/lan_scan_platform_interface.dart';
 import 'package:lan_scan/lan_scan_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-class MockLanScanPlatform
-    with MockPlatformInterfaceMixin
-    implements LanScanPlatform {
-
+class MockLanScanPlatform with MockPlatformInterfaceMixin implements LanScanPlatform {
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
 
   @override
-  Stream<Host> searchWiFiDetectionStream() {
-    // TODO: implement searchWiFiDetectionStream
+  Stream<Host?> startDeviceScanStream() {
+    // TODO: implement startDeviceScanStream
     throw UnimplementedError();
   }
 }

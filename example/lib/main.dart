@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:lan_scan/lan_scan.dart';
-import 'package:lan_scan_example/search_devices_page.dart';
+import 'package:lan_scan_example/lan_devices_scan_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
               Text('Running on: $_platformVersion\n'),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const SearchDevicesPage()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const LanDevicesScanPage()));
                 },
                 child: const Text('go to SearchDevicesPage'),
               ),

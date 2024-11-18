@@ -9,7 +9,7 @@ class LanScan {
     return LanScanPlatform.instance.getPlatformVersion();
   }
 
-  Stream<Host> searchWiFiDetectionStream() {
-    return LanScanPlatform.instance.searchWiFiDetectionStream();
+  Stream<Host?> startDeviceScanStream() {
+    return LanScanPlatform.instance.startDeviceScanStream();
   }
 }

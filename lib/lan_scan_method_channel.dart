@@ -13,7 +13,7 @@ class MethodChannelLanScan extends LanScanPlatform {
   final methodChannel = const MethodChannel('lan_scan');
 
   @visibleForTesting
-  final searchDevicesEventChannel = const EventChannel('lan_scan_search_devices');
+  final searchDevicesEventChannel = const EventChannel('lan_scan_event');
 
   @override
   Future<String?> getPlatformVersion() async {
@@ -22,8 +22,9 @@ class MethodChannelLanScan extends LanScanPlatform {
   }
 
   @override
-  Stream<Host> searchWiFiDetectionStream() {
+  Stream<Host?> startDeviceScanStream() {
     return searchDevicesEventChannel.receiveBroadcastStream().map((event) {
+      if(event == null) return null;
       final json = jsonDecode(event) as Map<String, dynamic>;
       return Host.fromJson(json);
     });

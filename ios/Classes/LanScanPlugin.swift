@@ -6,8 +6,11 @@ public class LanScanPlugin: NSObject, FlutterPlugin {
         let channel = FlutterMethodChannel(name: "lan_scan", binaryMessenger: registrar.messenger())
         let instance = LanScanPlugin()
         registrar.addMethodCallDelegate(instance, channel: channel)
-        let searchChannel = FlutterEventChannel(name: "lan_scan_search_devices", binaryMessenger: registrar.messenger())
-        searchChannel.setStreamHandler(SearchDevicesHandlerImpl())
+        let lanScanEventChannel = FlutterEventChannel(name: "lan_scan_event",
+                                                binaryMessenger:registrar.messenger(),
+                                                codec:FlutterStandardMethodCodec.sharedInstance(),
+                                                taskQueue: registrar.messenger().makeBackgroundTaskQueue?())
+        lanScanEventChannel.setStreamHandler(LanDeviceHandler())
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {

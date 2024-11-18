@@ -9,23 +9,23 @@ import Foundation
 
 class PingHelper: NSObject {
     
-    let ip:String
+    let ipAddress:String
     let timeout:TimeInterval
     
-    init(ip: String, timeout: TimeInterval = TimeInterval(3)) {
-        self.ip = ip
+    init(ipAddress: String, timeout: TimeInterval = TimeInterval(3)) {
+        self.ipAddress = ipAddress
         self.timeout = timeout
     }
     
     func  start () async  -> Bool {
         var isSuccess:Bool? = try? await withUnsafeThrowingContinuation { cont in
-            let pingTool = ICMPPingTool(host: ip, timeout: 1)
+            let pingTool = ICMPPingTool(host: ipAddress, timeout: 1)
             pingTool.startPing { isSuccess in
                 cont.resume(returning: isSuccess)
             }
         }
         
-        if (isSuccess != true) && (MacFinder.ip2mac(self.ip) != nil){
+        if (isSuccess != true) && (MacFinder.ip2mac(self.ipAddress) != nil){
             isSuccess = true
         }
         return isSuccess == true

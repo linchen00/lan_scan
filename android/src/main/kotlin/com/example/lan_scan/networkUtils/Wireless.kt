@@ -1,4 +1,4 @@
-package com.example.lan_scan.network
+package com.example.lan_scan.networkUtils
 
 
 import android.annotation.SuppressLint
@@ -119,7 +119,7 @@ class Wireless(private val context: Context) {
         return ip
     }
 
-    fun getInternalWifiIpString(): String {
+    private fun getInternalWifiIpString(): String {
         val internalWifiIp = getInternalWifiIpAddress()
         val bytes = ByteArray(4)
         bytes[0] = (internalWifiIp shr 24 and 0xFF).toByte()

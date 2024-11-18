@@ -1,4 +1,4 @@
-package com.example.lan_scan.network
+package com.example.lan_scan.networkUtils
 
 import kotlinx.serialization.Serializable
 @Serializable

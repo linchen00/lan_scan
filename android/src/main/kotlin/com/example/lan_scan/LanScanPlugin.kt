@@ -1,12 +1,13 @@
 package com.example.lan_scan
 
-import com.example.lan_scan.handler.SearchDevicesHandlerImpl
+import com.example.lan_scan.handler.LanDeviceHandler
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.StandardMethodCodec
 
 /** LanScanPlugin */
 class LanScanPlugin : FlutterPlugin, MethodCallHandler {
@@ -16,15 +17,21 @@ class LanScanPlugin : FlutterPlugin, MethodCallHandler {
     /// when the Flutter Engine is detached from the Activity
     private lateinit var channel: MethodChannel
 
-    private lateinit var searchChannel: EventChannel
+    private lateinit var lanScanEventChannel: EventChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "lan_scan")
         channel.setMethodCallHandler(this)
 
-        searchChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "lan_scan_search_devices")
-        searchChannel.setStreamHandler(SearchDevicesHandlerImpl(flutterPluginBinding.applicationContext))
+        lanScanEventChannel =
+            EventChannel(
+                flutterPluginBinding.binaryMessenger,
+                "lan_scan_event",
+                StandardMethodCodec.INSTANCE,
+                flutterPluginBinding.binaryMessenger.makeBackgroundTaskQueue()
+            )
+        lanScanEventChannel.setStreamHandler(LanDeviceHandler(flutterPluginBinding.applicationContext))
+//        lanScanEventChannel.setStreamHandler(LanDeviceHandler(flutterPluginBinding.applicationContext))
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -37,6 +44,6 @@ class LanScanPlugin : FlutterPlugin, MethodCallHandler {
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
-        searchChannel.setStreamHandler(null)
+        lanScanEventChannel.setStreamHandler(null)
     }
 }

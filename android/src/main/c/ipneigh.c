@@ -367,3 +367,22 @@ int Java_com_example_lan_1scan_task_ScanHostsAsyncTask_nativeIPNeigh(JNIEnv *env
 
     return res;
 }
+
+int Java_com_example_lan_1scan_scanner_LanDeviceScanner_nativeIPNeigh(JNIEnv *env, jobject thiz,
+																  jint fileDescriptor) {
+	FILE *mypipe = fdopen(fileDescriptor, "w");
+	if (mypipe == NULL) {
+		perror("Cannot fdopen");
+		exit(EXIT_FAILURE);
+	}
+
+	if (rtnl_open(&rth, 0) < 0)
+		exit(1);
+
+	int res = do_show_or_flush(mypipe);
+
+	rtnl_close(&rth);
+	fclose(mypipe);
+
+	return res;
+}

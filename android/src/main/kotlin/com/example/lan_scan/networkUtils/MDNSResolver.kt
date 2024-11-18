@@ -1,4 +1,4 @@
-package com.example.lan_scan.network
+package com.example.lan_scan.networkUtils
 
 import java.io.ByteArrayOutputStream
 import java.io.Closeable

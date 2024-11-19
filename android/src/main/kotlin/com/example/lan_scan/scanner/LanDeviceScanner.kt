@@ -64,7 +64,7 @@ class LanDeviceScanner(
         val netmask = -0x1 shr 32 - cidrPrefixLength shl 32 - cidrPrefixLength
         val numberOfHosts = 2.0.pow(hostBits).toInt() - 2
         val firstAddress = (ipv4 and netmask) + 1
-        val scanThreads = hostBits.toInt() * 4
+        val scanThreads = hostBits.toInt() * 8
 
         job = CoroutineScope(Dispatchers.IO).launch {
             try {

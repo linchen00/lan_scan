@@ -29,7 +29,7 @@ class LanDeviceScanner{
             let netmask = (0xFFFFFFFF << (32 - cidrPrefixLength)) & 0xFFFFFFFF
             let hostBits = Double(32 - cidrPrefixLength)
             let numberOfHosts = Int(pow(2.0, hostBits)) - 2
-            let concurrentThreads = (32 - cidrPrefixLength) * 4
+            let concurrentThreads = (32 - cidrPrefixLength) * 8
             let firstAddr = (ipv4 & netmask) + 1
             
             await withTaskGroup(of: Void.self) { taskGroup in

@@ -15,7 +15,7 @@ class LanDeviceScanner{
     private var ipv4:Int;
     private var cidrPrefixLength:Int;
     
-    private var taskGroup : TaskGroup<Void>?;
+    private var scanningTask: Task<Void, Never>?
     
     
     init(eventSink:@escaping FlutterEventSink, ipv4 : Int, cidrPrefixLength: Int) {
@@ -24,56 +24,56 @@ class LanDeviceScanner{
         self.cidrPrefixLength = cidrPrefixLength
     }
     
-    func startScanning() async -> Void {
-        
-        let netmask = (0xFFFFFFFF << (32 - cidrPrefixLength)) & 0xFFFFFFFF
-        let hostBits = Double(32 - cidrPrefixLength)
-        let numberOfHosts = Int(pow(2.0, hostBits)) - 2
-        let concurrentThreads = (32 - cidrPrefixLength) * 4
-        let firstAddr = (ipv4 & netmask) + 1
-        
-        await withTaskGroup(of: Void.self){ taskGroup in
-            self.taskGroup = taskGroup
+    func startScanning() -> Void {
+        scanningTask = Task {
+            let netmask = (0xFFFFFFFF << (32 - cidrPrefixLength)) & 0xFFFFFFFF
+            let hostBits = Double(32 - cidrPrefixLength)
+            let numberOfHosts = Int(pow(2.0, hostBits)) - 2
+            let concurrentThreads = (32 - cidrPrefixLength) * 4
+            let firstAddr = (ipv4 & netmask) + 1
             
-            for i in 0..<concurrentThreads {
-                taskGroup.addTask {
-                    for index in stride(from: i, to: numberOfHosts, by: concurrentThreads) {
-                        if Task.isCancelled { return }
-                        let ipAddress = self.getIPAddress(index: firstAddr+index)
-                        let pingHelper = PingHelper(ipAddress: ipAddress,timeout: TimeInterval(1))
-                        let pingSuccess = await pingHelper.start()
-                        if Task.isCancelled { return }
-                        if(pingSuccess){
-                            let host = await self.resolveHostname(ipAddress: ipAddress)
-                            if let jsonData = try? JSONEncoder().encode(host),
-                               let jsonString = String(data: jsonData, encoding: .utf8) {
-                                DispatchQueue.main.async {
-                                    self.eventSink(jsonString)
+            await withTaskGroup(of: Void.self) { taskGroup in
+                for i in 0..<concurrentThreads {
+                    taskGroup.addTask {
+                        for index in stride(from: i, to: numberOfHosts, by: concurrentThreads) {
+                            if Task.isCancelled { return }
+                            let ipAddress = self.getIPAddress(index: firstAddr + index)
+                            let pingHelper = PingHelper(ipAddress: ipAddress, timeout: TimeInterval(1))
+                            let pingSuccess = await pingHelper.start()
+                            if Task.isCancelled { return }
+                            if pingSuccess {
+                                let host = await self.resolveHostname(ipAddress: ipAddress)
+                                if let jsonData = try? JSONEncoder().encode(host),
+                                   let jsonString = String(data: jsonData, encoding: .utf8) {
+                                    DispatchQueue.main.async {
+                                        self.eventSink(jsonString)
+                                    }
                                 }
-                                
                             }
                         }
                     }
                 }
             }
-        }
-        if(self.taskGroup != nil){
-            DispatchQueue.main.async {
-                self.taskGroup = nil
-                self.eventSink(nil)
+            if(scanningTask != nil){
+                scanningTask = nil
+                DispatchQueue.main.async {
+                    self.eventSink(nil)
+                }
             }
+            
         }
-
+        
     }
     
     func stopScanning() -> Void {
-        if(self.taskGroup != nil){
+        if (scanningTask != nil){
+            scanningTask?.cancel()
+            scanningTask = nil
             DispatchQueue.main.async {
-                self.taskGroup?.cancelAll()
-                self.taskGroup = nil
                 self.eventSink(nil)
             }
         }
+        
     }
     
     private  func getIPAddress(index: Int) -> String {
@@ -92,17 +92,17 @@ class LanDeviceScanner{
         var hostname = host.hostname
         
         if hostname == nil{
-            if(taskGroup?.isCancelled == true) { return host}
+            if(scanningTask?.isCancelled == true) { return host}
             hostname = await mdnsResolver.resolve(ip: ipAddress)
         }
         
         if hostname == nil {
-            if(taskGroup?.isCancelled == true) { return host}
+            if(scanningTask?.isCancelled == true) { return host}
             hostname = netBIOSResolver.resolve(ip: ipAddress)
         }
         
         if hostname == nil {
-            if(taskGroup?.isCancelled == true) { return host}
+            if(scanningTask?.isCancelled == true) { return host}
             hostname = getHostName( ipAddress: ipAddress)
         }
         
@@ -115,7 +115,7 @@ class LanDeviceScanner{
     private func getHostName( ipAddress: String) -> String? {
         // 将 C 字符串转换为 in_addr 结构体
         var addr = in_addr()
-
+        
         // 将 IP 地址转换为 C 字符串
         let cIpAddress = ipAddress.cString(using: .utf8)
         if cIpAddress != nil {
@@ -129,7 +129,7 @@ class LanDeviceScanner{
             return String(cString: hostnamePtr)
         }
         return nil
-       
+        
     }
     
 }

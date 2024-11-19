@@ -20,10 +20,7 @@ class LanDeviceHandler: NSObject,FlutterStreamHandler {
         if let ipv4 = wireless.getInternalWifiIpAddress(),
            let cidrPrefixLength = wireless.getInternalWifiCidrPrefixLength() {
             lanDeviceScanner = LanDeviceScanner(eventSink: events, ipv4: ipv4, cidrPrefixLength: cidrPrefixLength)
-            Task{
-                await lanDeviceScanner?.startScanning()
-            }
-            
+            lanDeviceScanner?.startScanning()
         }else{
             DispatchQueue.main.async {
                 print("no wifi")

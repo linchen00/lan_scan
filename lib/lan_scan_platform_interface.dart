@@ -31,4 +31,8 @@ abstract class LanScanPlatform extends PlatformInterface {
   Stream<Host?> startDeviceScanStream() {
     throw UnimplementedError('startDeviceScanStream() has not been implemented.');
   }
+
+  Stream<bool> wifiConnectionStatusChange() {
+    throw UnimplementedError('wifiConnectionStatusChange() has not been implemented.');
+  }
 }

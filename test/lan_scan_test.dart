@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lan_scan/lan_scan.dart';
 import 'package:lan_scan/lan_scan_platform_interface.dart';
@@ -11,6 +13,12 @@ class MockLanScanPlatform with MockPlatformInterfaceMixin implements LanScanPlat
   @override
   Stream<Host?> startDeviceScanStream() {
     // TODO: implement startDeviceScanStream
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<bool> wifiConnectionStatusChange() {
+    // TODO: implement wifiConnectionStatusChange
     throw UnimplementedError();
   }
 }

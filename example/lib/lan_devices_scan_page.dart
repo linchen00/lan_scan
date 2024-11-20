@@ -15,7 +15,15 @@ class _LanDevicesScanPageState extends State<LanDevicesScanPage> {
   final _lanScanPlugin = LanScan();
 
   final List<String> list = [];
+  bool isWifiConnected = false;
   StreamSubscription<Host?>? _searchDevicesSubscription;
+  StreamSubscription<bool>? _wifiConnectionStatusSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    startListenWifiConnectionStatus();
+  }
 
   @override
   void dispose() {
@@ -31,7 +39,7 @@ class _LanDevicesScanPageState extends State<LanDevicesScanPage> {
         (Host? host) {
           if (host == null) {
             _searchDevicesSubscription = null;
-            print("searchWiFiDetectionStreamDone");
+            debugPrint("searchWiFiDetectionStreamDone");
           } else {
             setState(() {
               list.add(host.toString());
@@ -45,6 +53,20 @@ class _LanDevicesScanPageState extends State<LanDevicesScanPage> {
   void stopScanningLanDevices() {
     _searchDevicesSubscription?.cancel();
     _searchDevicesSubscription = null;
+  }
+
+  void startListenWifiConnectionStatus() {
+    _wifiConnectionStatusSubscription = _lanScanPlugin.wifiConnectionStatusChange().listen((event) {
+      setState(() {
+        isWifiConnected = event;
+      });
+      debugPrint("wifiConnectionStatusChange:$event");
+    });
+  }
+
+  void stopListenWifiConnectionStatus() {
+    _wifiConnectionStatusSubscription?.cancel();
+    _wifiConnectionStatusSubscription = null;
   }
 
   void clearList() {
@@ -61,6 +83,15 @@ class _LanDevicesScanPageState extends State<LanDevicesScanPage> {
       ),
       body: Column(
         children: [
+          ElevatedButton(
+            onPressed: startListenWifiConnectionStatus,
+            child: const Text("start listen wifi connection status"),
+          ),
+          ElevatedButton(
+            onPressed: stopListenWifiConnectionStatus,
+            child: const Text("stop listen wifi connection status"),
+          ),
+          Text("print WiFi connection status(${isWifiConnected})"),
           ElevatedButton(
             onPressed: startScanningLanDevices,
             child: const Text("start scanning Lan Devices"),

@@ -1,6 +1,7 @@
 package com.example.lan_scan
 
 import com.example.lan_scan.handler.LanDeviceHandler
+import com.example.lan_scan.handler.WiFiConnectionStatusHandler
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
@@ -18,6 +19,7 @@ class LanScanPlugin : FlutterPlugin, MethodCallHandler {
     private lateinit var channel: MethodChannel
 
     private lateinit var lanScanEventChannel: EventChannel
+    private lateinit var wifiConnectionStatusChangeEventChannel: EventChannel
 
     override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "lan_scan")
@@ -31,7 +33,15 @@ class LanScanPlugin : FlutterPlugin, MethodCallHandler {
                 flutterPluginBinding.binaryMessenger.makeBackgroundTaskQueue()
             )
         lanScanEventChannel.setStreamHandler(LanDeviceHandler(flutterPluginBinding.applicationContext))
-//        lanScanEventChannel.setStreamHandler(LanDeviceHandler(flutterPluginBinding.applicationContext))
+
+        wifiConnectionStatusChangeEventChannel =
+            EventChannel(
+                flutterPluginBinding.binaryMessenger,
+                "wifi_connection_status_change_event",
+                StandardMethodCodec.INSTANCE,
+                flutterPluginBinding.binaryMessenger.makeBackgroundTaskQueue()
+            )
+        wifiConnectionStatusChangeEventChannel.setStreamHandler(WiFiConnectionStatusHandler(flutterPluginBinding.applicationContext))
     }
 
     override fun onMethodCall(call: MethodCall, result: Result) {
@@ -45,5 +55,6 @@ class LanScanPlugin : FlutterPlugin, MethodCallHandler {
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         lanScanEventChannel.setStreamHandler(null)
+        wifiConnectionStatusChangeEventChannel.setStreamHandler(null)
     }
 }

@@ -30,6 +30,21 @@ class Wireless{
         }
     }
     
+    func checkWifiConnection(completion: @escaping (Bool) -> Void) {
+        let monitor = NWPathMonitor()
+        let queue = DispatchQueue(label: "WifiCheckQueue")
+        
+        monitor.pathUpdateHandler = { path in
+            if path.status == .satisfied && path.usesInterfaceType(.wifi) {
+                completion(true) // Wi-Fi is connected
+            } else {
+                completion(false) // Wi-Fi is not connected
+            }
+            monitor.cancel() // Stop monitoring after the first check
+        }
+        monitor.start(queue: queue)
+    }
+    
     func getSSID() -> String? {
         guard let interfaces = CNCopySupportedInterfaces() as? [String] else {
             return nil

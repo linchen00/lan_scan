@@ -11,12 +11,20 @@ public class LanScanPlugin: NSObject, FlutterPlugin {
                                                 codec:FlutterStandardMethodCodec.sharedInstance(),
                                                 taskQueue: registrar.messenger().makeBackgroundTaskQueue?())
         lanScanEventChannel.setStreamHandler(LanDeviceHandler())
+        
+        let wifiConnectionStatusChangeEventChannel = FlutterEventChannel(name: "wifi_connection_status_change_event",
+                                                binaryMessenger:registrar.messenger())
+        wifiConnectionStatusChangeEventChannel.setStreamHandler(WiFiConnectionStatusHandler())
     }
     
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
+        case "isWifiConnected":
+            Wireless().checkWifiConnection{ isConnected in
+                result(isConnected)
+            }
         default:
             result(FlutterMethodNotImplemented)
         }

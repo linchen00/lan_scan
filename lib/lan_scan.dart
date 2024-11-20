@@ -12,4 +12,8 @@ class LanScan {
   Stream<Host?> startDeviceScanStream() {
     return LanScanPlatform.instance.startDeviceScanStream();
   }
+
+  Stream<bool> wifiConnectionStatusChange() {
+    return LanScanPlatform.instance.wifiConnectionStatusChange();
+  }
 }

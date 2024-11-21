@@ -21,10 +21,6 @@ public class LanScanPlugin: NSObject, FlutterPlugin {
         switch call.method {
         case "getPlatformVersion":
             result("iOS " + UIDevice.current.systemVersion)
-        case "isWifiConnected":
-            Wireless().checkWifiConnection{ isConnected in
-                result(isConnected)
-            }
         default:
             result(FlutterMethodNotImplemented)
         }
